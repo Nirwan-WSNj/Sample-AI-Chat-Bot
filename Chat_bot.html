@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SNTDM Chatbot</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 95vh;
+      margin: 0;
+      padding: 20px 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .chat-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px 20px 0 0;
+      padding: 25px 30px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-header h2 {
+      margin: 0;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.8rem;
+    }
+
+    .bot-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .chat-container {
+      height: 55vh;
+      overflow-y: auto;
+      padding: 25px 20px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      position: relative;
+      scrollbar-width: thin;
+      scrollbar-color: #667eea #f1f1f1;
+    }
+
+    .chat-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+    }
+
+    .message {
+      max-width: 75%;
+      margin: 15px 0;
+      padding: 0;
+      border-radius: 20px;
+      word-wrap: break-word;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: messageSlideIn 0.3s ease-out;
+    }
+
+    @keyframes messageSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .user-message {
+      margin-left: auto;
+      flex-direction: row-reverse;
+    }
+
+    .bot-message {
+      margin-right: auto;
+    }
+
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .user-message .message-avatar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .bot-message .message-avatar {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .message-bubble {
+      padding: 15px 20px;
+      border-radius: 20px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .user-message .message-bubble {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom-right-radius: 8px;
+    }
+
+    .bot-message .message-bubble {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-bottom-left-radius: 8px;
+    }
+
+    .timestamp {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 8px;
+      text-align: right;
+    }
+
+    .bot-message .timestamp {
+      color: #888;
+    }
+
+    .input-section {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 25px 30px;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-group {
+      margin-bottom: 0;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control {
+      border: none;
+      padding: 15px 20px;
+      font-size: 16px;
+      background: white;
+      border-radius: 25px 0 0 25px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      box-shadow: none;
+      border: none;
+      background: white;
+    }
+
+    .btn {
+      border: none;
+      padding: 15px 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5a67d8 0%, #6b5b95 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:first-of-type {
+      border-radius: 0 25px 25px 0;
+    }
+
+    .btn-primary:last-of-type {
+      border-radius: 25px;
+      margin-left: 10px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    }
+
+    .btn-primary:last-of-type:hover {
+      background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    }
+
+    .loader {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 15px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .chat-wrapper {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #888;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 15px;
+      }
+      
+      .chat-header {
+        padding: 20px;
+        border-radius: 15px 15px 0 0;
+      }
+      
+      .chat-header h2 {
+        font-size: 1.5rem;
+      }
+      
+      .chat-container {
+        padding: 20px;
+        height: 60vh;
+      }
+      
+      .input-section {
+        padding: 20px;
+        border-radius: 0 0 15px 15px;
+      }
+      
+      .message {
+        max-width: 85%;
+      }
+      
+      .btn {
+        padding: 12px 20px;
+        font-size: 14px;
+      }
+    }
+
+    /* Message content styling */
+    .message-content h1, .message-content h2, .message-content h3 {
+      color: inherit;
+      font-size: 1.1em;
+      margin: 10px 0 5px 0;
+    }
+
+    .message-content p {
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    .message-content code {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .user-message .message-content code {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="chat-wrapper">
+      <div class="chat-header">
+        <h2>
+          <div class="bot-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          SNTDM Chatbot
+        </h2>
+      </div>
+      
+      <div class="chat-container" id="chatContainer">
+        <div class="empty-state">
+          <i class="fas fa-comments"></i>
+          <h3>Welcome to SNTDM Chatbot</h3>
+          <p>Start a conversation by typing a message below</p>
+        </div>
+      </div>
+      
+      <div class="input-section">
+        <div class="input-group">
+          <input type="text" id="userInput" class="form-control" placeholder="Type your message here..." 
+                 onkeypress="if(event.keyCode === 13) sendMessage()">
+          <div class="input-group-append">
+            <button class="btn btn-primary" onclick="sendMessage()">
+              <i class="fas fa-paper-plane"></i> Send
+            </button>
+            <button class="btn btn-primary" onclick="clearChat()">
+              <i class="fas fa-trash"></i> Clear
+            </button>
+          </div>
+        </div>
+        <div id="loader" class="loader" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const userMessage = input.value.trim();
+      const chatContainer = document.getElementById('chatContainer');
+      const loader = document.getElementById('loader');
+
+      if (!userMessage) return;
+
+      // Remove empty state if present
+      const emptyState = chatContainer.querySelector('.empty-state');
+      if (emptyState) {
+        emptyState.remove();
+      }
+
+      addMessage(userMessage, 'user');
+      input.value = '';
+      loader.style.display = 'block';
+
+      try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer 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',//add api
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://www.sitename.com',
+            'X-Title': 'SNTDM Chatbot',
+          },
+          body: JSON.stringify({
+            model: 'google/gemma-3n-e4b-it:free',
+            messages: [
+              { role: 'user', content: userMessage }
+            ]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const botResponse = data.choices?.[0]?.message?.content || 'No response received.';
+        addMessage(marked.parse(botResponse), 'bot');
+      } catch (error) {
+        addMessage(`Error: ${error.message}`, 'bot');
+      } finally {
+        loader.style.display = 'none';
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
+
+    function addMessage(content, sender) {
+      const chatContainer = document.getElementById('chatContainer');
+      const messageDiv = document.createElement('div');
+      const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const icon = sender === 'user' 
+        ? '<i class="fas fa-user"></i>' 
+        : '<i class="fas fa-robot"></i>';
+
+      messageDiv.className = `message ${sender}-message`;
+      messageDiv.innerHTML = `
+        <div class="message-avatar">
+          ${icon}
+        </div>
+        <div class="message-bubble">
+          <div class="message-content">${content}</div>
+          <div class="timestamp">${timestamp}</div>
+        </div>
+      `;
+
+      chatContainer.appendChild(messageDiv);
+    }
+
+    function clearChat() {
+      const chatContainer = document.getElementById('chatContainer');
+      chatContainer.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-comments"></i>
+          <h3>Welcome to SNTDM Chatbot</h3>
+          <p>Start a conversation by typing a message below</p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
