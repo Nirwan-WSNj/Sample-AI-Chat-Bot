@@ -93,25 +93,6 @@ SNTDM-AI-Chatbot/
 
 ## ⚙️ Configuration
 
-### API Configuration
-The chatbot uses OpenRouter API with the following configuration:
-
-```javascript
-// API Endpoint
-const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
-// Model Configuration
-const MODEL = 'google/gemma-3n-e4b-it:free';
-
-// Headers
-const headers = {
-  'Authorization': 'Bearer YOUR_API_KEY',
-  'Content-Type': 'application/json',
-  'HTTP-Referer': 'https://www.sitename.com',
-  'X-Title': 'SNTDM Chatbot'
-};
-```
-
 ### Customization Options
 
 #### 🎨 Styling
@@ -126,16 +107,12 @@ const headers = {
 - **Max Tokens**: Control response length
 - **System Prompt**: Add custom instructions
 
-## 🔐 API Key Setup
+## 🔐 Security Note
 
-1. **Get OpenRouter API Key**
-   - Visit [OpenRouter.ai](https://openrouter.ai/)
-   - Sign up for an account
-   - Generate your API key
-
-2. **Configure the Key**
-   - Replace `YOUR_API_KEY` in `Chat_bot.html`
-   - Keep your API key secure and never commit it to public repositories
+⚠️ **Important**: This project requires an API key for AI functionality. For security reasons:
+- Never commit API keys to version control
+- Use environment variables or secure configuration files
+- Keep your API credentials private and secure
 
 ## 📱 Browser Compatibility
 
@@ -176,11 +153,11 @@ Bot: Machine learning is like teaching a computer to learn patterns from example
 
 ### Common Issues
 
-**1. API Key Error**
+**1. Authentication Error**
 ```
 Error: HTTP error! Status: 401
 ```
-- **Solution**: Check your API key is correct and has sufficient credits
+- **Solution**: Verify API configuration and credentials
 
 **2. Network Error**
 ```
@@ -198,7 +175,7 @@ Error: CORS policy blocked
 ```
 Long loading times
 ```
-- **Solution**: Check API rate limits and server status
+- **Solution**: Check network connection and server status
 
 ## 📊 Performance Metrics
 
